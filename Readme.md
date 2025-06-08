@@ -90,8 +90,6 @@ The **Uploader Service** provides a simple API to upload videos to the S3 bucket
    npm start
    ```
 
-Each service can be run individually or orchestrated with Docker if needed.
-
 ## Environment Variables
 
 Each service requires specific environment variables to be set. Below is the list of required environment variables for each service.

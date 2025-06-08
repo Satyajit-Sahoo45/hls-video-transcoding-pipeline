@@ -1,4 +1,4 @@
-# Video Transcoding Microservices
+# Video Transcoding Pipeline
 
 This repository contains three microservices for handling video transcoding tasks using AWS services. The services include:
 

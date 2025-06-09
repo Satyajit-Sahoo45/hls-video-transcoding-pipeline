@@ -26,7 +26,7 @@ const ecsClient = new ECSClient({
   },
 });
 const queueUrl =
-  "https://sqs.us-east-1.amazonaws.com/725523420264/transcode-queue";
+  "https://sqs.us-east-1.amazonaws.com/933723420264/transcode-queue";
 
 async function init() {
   const params = {
@@ -57,6 +57,7 @@ async function init() {
             continue;
           }
 
+          // validate and parse the event
           const event = JSON.parse(Body);
           if ("Service" in event && "Event" in event) {
             if (event.Event === "s3:TestEvent") {
@@ -75,18 +76,18 @@ async function init() {
             } = s3;
 
             const input = {
-              cluster: "arn:aws:ecs:us-east-1:725523420264:cluster/hls-dev",
+              cluster: "arn:aws:ecs:us-east-1:654443420264:cluster/hls-dev",
               taskDefinition:
-                "arn:aws:ecs:us-east-1:725523420264:task-definition/video-transcoder:1",
+                "arn:aws:ecs:us-east-1:654443420264:task-definition/video-transcoder:1",
               launchType: "FARGATE" as LaunchType | undefined,
               networkConfiguration: {
                 awsvpcConfiguration: {
                   assignPublicIp: "ENABLED" as AssignPublicIp | undefined,
-                  securityGroups: ["sg-011b08bbbf713a0fa"],
+                  securityGroups: ["sg-011b08bbbf713a0fb"],
                   subnets: [
                     "subnet-09e8e921492d48851",
                     "subnet-0784c4ce41f752a86",
-                    "subnet-01f51a732a9243bbb",
+                    "subnet-01f31b732a9243baa",
                   ],
                 },
               },
@@ -113,11 +114,12 @@ async function init() {
                 `Failed to launch ECS task for ${bucket.name}/${key}:`,
                 error
               );
-              // Optionally, we might want to implement a retry mechanism here
+              // retry mechanism here
               continue;
             }
           }
 
+          // Delete the message from queue
           try {
             await sqsClient.send(
               new DeleteMessageCommand({
@@ -131,11 +133,11 @@ async function init() {
               `Failed to delete message ${MessageId} from queue:`,
               error
             );
-            // Optionally, implement retry logic for message deletion
+            // retry mechanism for message deletion
           }
         } catch (messageError) {
           console.error("Error processing message:", messageError);
-          // Log the problematic message for further investigation
+          // Log the problematic message
           console.error("Problematic message:", message);
         }
       }

@@ -67,6 +67,11 @@ async function init() {
           }
           console.log(`Message Received`, { MessageId, Body });
 
+          // 1. create a repo in the AWS-ECR and push the docker container for the transcoder
+          // 2. then create a cluster in ECS service (keep the infrastructure as FARGATE)
+          // 3. then create a task in ECS task defination section and keep lunch type AWS FARGATE, docker-image URI in container details
+
+          // spin the docker container
           for (const record of event.Records) {
             const { s3 } = record;
 
@@ -75,10 +80,11 @@ async function init() {
               object: { key },
             } = s3;
 
+            // linking docker container with consumer to run the transcoder container through the consumer after receving events
             const input = {
-              cluster: "arn:aws:ecs:us-east-1:654443420264:cluster/hls-dev",
+              cluster: "arn:aws:ecs:us-east-1:654443420264:cluster/hls-dev", // created cluster's ARN. (to specify a task to a cluster)
               taskDefinition:
-                "arn:aws:ecs:us-east-1:654443420264:task-definition/video-transcoder:1",
+                "arn:aws:ecs:us-east-1:654443420264:task-definition/video-transcoder:1", // created task's ARN
               launchType: "FARGATE" as LaunchType | undefined,
               networkConfiguration: {
                 awsvpcConfiguration: {
@@ -94,9 +100,9 @@ async function init() {
               overrides: {
                 containerOverrides: [
                   {
-                    name: "video-transcoder",
+                    name: "video-transcoder", // name of the created container in ECS task
                     environment: [
-                      { name: "BUCKET_NAME", value: bucket.name },
+                      { name: "BUCKET_NAME", value: bucket.name }, // original video's upload container name
                       { name: "KEY", value: key },
                     ],
                   },
